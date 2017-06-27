@@ -3,10 +3,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include <boost/program_options.hpp>
+//#include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
-#include <boost/filesystem.hpp>
 
 #include "utils.h"
 
@@ -18,16 +16,14 @@ int main( int argc, const char* argv[] )
     }
 
     /*boost::program_options::options_description desc("Allowed options");
-
     desc.add_options()
         ("save,s", "save images in local folder")
     ;
     boost::program_options::variables_map vm;
     boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
     boost::program_options::notify(vm); 
-*/
+    */
     std::string data = retrieve_data( argv[1] );
-    //std::string url = std::string(argv[1]);//+std::string("/");
 	std::vector<std::string> images = img_find( data, argv[1] );
 
    // if( vm.count("save")) {
@@ -40,7 +36,6 @@ int main( int argc, const char* argv[] )
         std::cout << "Saving " << i  << std::endl;
         img_save( s, "img/" + url_comp.back());
     }
-
    //}
     //else{
         return 0;

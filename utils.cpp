@@ -9,15 +9,13 @@
 
 #include "utils.h"
 
-
 size_t write_callback(char* buf, size_t size, size_t nmemb, void* userp) {   //size*nmemb is the size of the buffer	 
-    std::string * data  = (std::string *) userp;
-	for (int c = 0; c < size*nmemb; c++) {
+    std::string * data  = static_cast <std::string *>(userp);
+	for (int c = 0; c < size * nmemb; c++) {
         *data += buf[c];
     }
     return size * nmemb; //tell curl how many bytes we handled
 }
-
 
 size_t write_data(char *ptr, size_t size, size_t nmemb, void *userdata) {
     std::ofstream *out = static_cast<std::ofstream *>(userdata);
@@ -25,7 +23,6 @@ size_t write_data(char *ptr, size_t size, size_t nmemb, void *userdata) {
     out->write(ptr, nbytes);
     return nbytes;
 }
-
 
 std::string retrieve_data( const char *url ) {
 	CURL* curl; //our curl object
@@ -45,7 +42,7 @@ std::string retrieve_data( const char *url ) {
 	file.open ("web_content.txt");
 	file << data;
 	file.close();
-	/////////////////////////////
+	///////////////////////////////
 
 	curl_easy_cleanup(curl);
 	curl_global_cleanup();
@@ -53,7 +50,6 @@ std::string retrieve_data( const char *url ) {
 	return data;
 
 }
-
 
 std::vector<std::string> img_find( std::string data , const char *url ) {
     int count = 0;
@@ -66,23 +62,19 @@ std::vector<std::string> img_find( std::string data , const char *url ) {
 
     for(auto str : strs ) {
 		if ( boost::regex_match (str, pattern) ) {
-			//std::cout << " STR = " << str << std::endl;
 			boost::split(img, str, boost::is_any_of(" "));
 			for( auto s : img ) {
 				if( boost::contains( s, "src=" )) {
-
 					boost::erase_all(s, "src=" );
 					boost::erase_all(s, "\"" );
 					if( boost::contains(s, "//") ) {
 						if( !boost::contains(s, "http") ) {
 							s = "https:" + s;
 						}
-							
 					}
 					else { 
 						s = url + s;
 					}
-					
 					std::vector<std::string>::iterator i = find(result.begin(), result.end(), s);
 					if( i == result.end() ) {
 						result.push_back(s);
@@ -90,21 +82,15 @@ std::vector<std::string> img_find( std::string data , const char *url ) {
 						count++;
 						
 					}
-						
 				}
-
 			}
-
 		}
-			
     }
     std::cout << "\n#images = " << count << std::endl;
 	return result;
 } 
 
-
-void img_save(char *url, std::string name) {
-
+void img_save( char *url, std::string name ) {
 	CURL *image; 
 	CURLcode imgresult; 
 	std::ofstream img_file;
@@ -114,7 +100,6 @@ void img_save(char *url, std::string name) {
     {
 		std::cout << "Error file" << std::endl;
 	}
-	
 
 	image = curl_easy_init(); 
 	if( image ){ 
@@ -131,40 +116,6 @@ void img_save(char *url, std::string name) {
 	else {
 		std::cout << "Error " << std::endl;
 	} 
-	// Clean up the resources 
-	curl_easy_cleanup(image); 
-	// Close the file 
+	curl_easy_cleanup(image); // Clean up the resources 
 	img_file.close();
-	
-
 }
-
-
-/*
-void img_find( std::string data ) {
-    int count = 0;
-    std::vector<std::string> strs, img;
-
-    boost::split(strs, data ,boost::is_any_of("<>"));
-
-    for(auto str : strs ) {
-
-		if( boost::contains( str, "img " )) {
-
-			boost::split(img, str, boost::is_any_of(" "));
-			for( auto s : img ) {
-				if( boost::contains( s, "src=" )) {
-
-					boost::erase_all(s, "src=" );
-					boost::erase_all(s, "\"" );
-					std::cout << s << std::endl;
-					count++;
-				}
-
-			}
-		}
-
-    }
-    std::cout << "\n #images = " << count << std::endl;
-} 
-*/

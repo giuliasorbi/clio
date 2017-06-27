@@ -10,8 +10,12 @@ project(${exercise} CXX)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
+set ( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ~/cpp-netlib-build )
 find_package(Boost 1.59 REQUIRED COMPONENTS system date_time regex)
-find_package(CURL)
+#find_package(CURL)
+find_package ( cppnetlib 0.11.0 REQUIRED )
+
+
 
 # Enable C++11 features on gcc/clang
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(GNU|Clang)")
@@ -33,10 +37,12 @@ add_executable(${exercise}  ${exercise_cpp} utils.cpp utils.h ) # ${file}.h)
 
 # We need boost includes
 target_include_directories(${exercise} PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(${exercise} PRIVATE  ${CURL_INCLUDE_DIR})
+#target_include_directories(${exercise} PRIVATE ${CURL_INCLUDE_DIR})
+include_directories(${exercise} PRIVATE ${CPPNETLIB_INCLUDE_DIRS} )
 
 # We need boost libraries
 target_link_libraries(${exercise} ${Boost_LIBRARIES})
-target_link_libraries(${exercise} ${CURL_LIBRARIES})
+#target_link_libraries( ${CURL_LIBRARIES})
+target_link_libraries(${exercise} ${CPPNETLIB_LIBRARIES} )
 
 
