@@ -22,8 +22,6 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(GNU|Clang)")
 endif()
 
 
-# Get a source filename from the exercise name by replacing -'s with _'s
-
 # Implementation could be only a header
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${exercise}.cpp)
     set(exercise_cpp ${exercise}.cpp)
@@ -34,7 +32,7 @@ endif()
 add_definitions(-DBOOST_NETWORK_ENABLE_HTTPS)
 
 # Build executable from sources and headers
-add_executable(${exercise}  ${exercise_cpp} utils.cpp utils.h ) #  
+add_executable(${exercise}  ${exercise_cpp} search_images.cpp search_images.h )
 
 # We need boost includes
 target_include_directories(${exercise} PRIVATE ${Boost_INCLUDE_DIRS})
