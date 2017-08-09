@@ -14,9 +14,7 @@ int main( int argc, const char* argv[] )
     using namespace boost::program_options;
 
     bool save = false;
-    std::string directory = "";
     bool write_file = false;
-    std::string filename = "";
     std::vector<std::string> url;
 
     try {
@@ -24,8 +22,8 @@ int main( int argc, const char* argv[] )
         desc.add_options()
             ( "help", "produce help message" )
             ( "url", value<std::vector<std::string>>(), "input url" )
-            ( "save,s", value<std::string>(), "save images in local folder" )
-            ( "output,o", value<std::string>(), "write images url in local file" )
+            ( "save,s", "save images in local folder" )
+            ( "output,o", "write images url in local file" )
         ;
         positional_options_description p;
         p.add( "url", -1 );
@@ -43,19 +41,14 @@ int main( int argc, const char* argv[] )
         else {
             if( vm.count( "save" )) {
                 save = true;
-                directory = vm[ "save" ].as<std::string>();
             }
             if( vm.count( "output" )) {
                 write_file = true;
-                filename = vm[ "output" ].as<std::string>();
-                if( !boost::contains ( filename, "." ) ) {
-                    filename = filename + ".txt";
-                }
             }
             if ( vm.count( "url" ) ) {
                 url = vm[ "url" ].as<std::vector<std::string>>();
             }
-            else{
+            else {
                 std::cout << "Error: the option --url is required" << std::endl;
             }
         }
@@ -65,7 +58,7 @@ int main( int argc, const char* argv[] )
         return 1;
     }
 
-    search_images s( save, directory, write_file, filename ); // constructor
+    search_images s( save, write_file ); // constructor
 
     for ( auto u : url ) {
         std::cout << "\n\n----- Retrieving data from " << u << " -----" << std::endl;

@@ -13,20 +13,26 @@
 #include "search_images.h"
 
 // constructor
-search_images::search_images( const bool& save, const std::string& directory, const bool& write_file, const std::string& filename )
+search_images::search_images( const bool& save, const bool& write_file )
 {
 	m_save = save;
-	m_directory = directory;
 	m_write_file = write_file;
-	m_filename = filename;
 }
 
-std::string get_filename( const boost::network::uri::uri &url )
+std::string get_filename( const std::string& url ) // get downloaded img name
 {
-	std::string path = boost::network::uri::path(url);
-	std::size_t index = path.find_last_of('/');
-	std::string filename = path.substr(index + 1);
-	return filename.empty()? "index.html" : filename;
+	std::size_t index = url.find_last_of( '/' );
+	std::string filename = url.substr( index + 1 );
+	return filename.empty()? "index" : filename;
+}
+
+std::string get_sname( const std::string& url ) // get direcory name to download img ( or file name to write img url )
+{
+	std::size_t index = url.find_first_of( '.' );
+	std::string sname = url.substr( index + 1 );
+	std::replace( sname.begin(), sname.end(), '.', '_');
+	std::replace( sname.begin(), sname.end(), '/', '_');
+	return sname.empty()? "index" : sname;
 }
 
 void search_images::search( const std::string& url ) 
@@ -41,7 +47,6 @@ void search_images::search( const std::string& url )
 	
 		try {
 			http::client::request request( url );
-			
 			request << header( "Connection", "close" );
 			http::client::response response = client.get( request );
 			
@@ -52,14 +57,13 @@ void search_images::search( const std::string& url )
 			file.close();
 			///////////////////////////////
 
-			std::vector<std::string> img = img_find( body( response), url );
+			std::vector<std::string> img = img_find( body( response ), url );
 			
 			if( m_save ) {
-				img_save( m_directory, img );
+				img_save( get_sname( url ), img );
 			}
-
 			if( m_write_file ) {
-				img_write( m_filename, img );
+				img_write( get_sname( url ) + ".txt", img );
 			}
 
 		} catch ( const std::exception& ex ) {
@@ -82,7 +86,7 @@ std::vector<std::string> search_images::img_find( const std::string& data , cons
 
 	boost::split( strs, data ,boost::is_any_of( "<>" ) );
 
-	for(auto str : strs ) {
+	for( auto str : strs ) {
 		if ( boost::regex_match (str, pattern) ) {
 			boost::split( img, str, boost::is_any_of( " " ) );
 			for( auto s : img ) {
@@ -95,7 +99,12 @@ std::vector<std::string> search_images::img_find( const std::string& data , cons
 						boost::iterator_range<std::string::iterator> it = finder( s.begin(), s.end() );
 						int index = std::distance( s.begin(), it.begin() );
 						if( index == 0 ) {
+							if( boost::contains ( url, "https" ) ) {
 								s = "https:" + s;
+							}
+							else {
+								s = "http:" + s;
+							}
 						}
 						else { 
 							s = url + s;
@@ -110,8 +119,8 @@ std::vector<std::string> search_images::img_find( const std::string& data , cons
 							count++;
 						}
 					}
-
 				}
+
 			}
 		}
 	}
@@ -132,13 +141,12 @@ void search_images::img_save( const std::string& directory, const std::vector<st
 	http::client client( options );
 
 	for( auto u : url ) {
-		
 		try {
 			http::client::request request( u );
 			http::client::response response = client.get( request );
-			std::string filename = get_filename( request.uri() );
+
+			std::string filename = get_filename( u );
 			std::cout << "Saving to: " << directory + "/" + filename << std::endl;
-			
 			std::ofstream ofs( directory + "/" + filename.c_str() );
 			ofs << static_cast<std::string>( body( response ) ) << std::endl;
 		} catch ( std::exception& ex ) {
